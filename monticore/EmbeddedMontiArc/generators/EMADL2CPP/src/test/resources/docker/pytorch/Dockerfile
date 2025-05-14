@@ -33,13 +33,14 @@ RUN echo '#include <torch/torch.h>\n'\
 '  return 0;\n'\
 '}' > /usr/lib/test_libtorch.cpp
 
-# Add CMakeLists.txt
-RUN echo "cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-    project(test_libtorch)
-    find_package(Torch REQUIRED)
-    add_executable(test_libtorch /usr/lib/test_libtorch.cpp)
-    target_link_libraries(test_libtorch \${TORCH_LIBRARIES})
-    set_property(TARGET test_libtorch PROPERTY CXX_STANDARD 14)" > /usr/lib/CMakeLists.txt
+RUN cat <<EOF > /usr/lib/CMakeLists.txt
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+project(test_libtorch)
+find_package(Torch REQUIRED)
+add_executable(test_libtorch /usr/lib/test_libtorch.cpp)
+target_link_libraries(test_libtorch \${TORCH_LIBRARIES})
+set_property(TARGET test_libtorch PROPERTY CXX_STANDARD 14)
+EOF
 
 # Compile and run the test program via CMake
 RUN mkdir /usr/lib/build && cd /usr/lib/build && \
