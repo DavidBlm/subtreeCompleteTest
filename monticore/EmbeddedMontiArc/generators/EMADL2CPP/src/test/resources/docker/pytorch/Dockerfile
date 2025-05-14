@@ -25,6 +25,7 @@ RUN wget https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.1
     unzip /usr/lib/libtorch.zip -d /usr/lib && \
     rm /usr/lib/libtorch.zip
 # Add a test program to verify libtorch install
+# Add test program
 RUN echo '#include <torch/torch.h>\n'\
 '#include <iostream>\n'\
 'int main() {\n'\
@@ -32,8 +33,17 @@ RUN echo '#include <torch/torch.h>\n'\
 '  return 0;\n'\
 '}' > /usr/lib/test_libtorch.cpp
 
-# Compile and run the test program
-RUN g++ -I/usr/lib/libtorch/include -I/usr/lib/libtorch/include/torch/csrc/api/include \
-    /usr/lib/test_libtorch.cpp -o /usr/lib/test_libtorch \
-    -L/usr/lib/libtorch/lib -ltorch_cpu -ltorch -lc10 -Wl,-rpath,/usr/lib/libtorch/lib && \
-    /usr/lib/test_libtorch
+# Add CMakeLists.txt
+RUN echo "cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+project(test_libtorch)
+find_package(Torch REQUIRED)
+add_executable(test_libtorch /usr/lib/test_libtorch.cpp)
+target_link_libraries(test_libtorch \${TORCH_LIBRARIES})
+set_property(TARGET test_libtorch PROPERTY CXX_STANDARD 14)" > /usr/lib/CMakeLists.txt
+
+# Compile and run the test program via CMake
+RUN mkdir /usr/lib/build && cd /usr/lib/build && \
+    cmake -DCMAKE_PREFIX_PATH=/usr/lib/libtorch .. && \
+    cmake --build . && \
+    ./test_libtorch
+
