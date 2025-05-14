@@ -24,3 +24,16 @@ ENV DGLBACKEND=pytorch
 RUN wget https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.12.0%2Bcpu.zip -O /usr/lib/libtorch.zip && \
     unzip /usr/lib/libtorch.zip -d /usr/lib && \
     rm /usr/lib/libtorch.zip
+# Add a test program to verify libtorch install
+RUN echo '#include <torch/torch.h>\n'\
+'#include <iostream>\n'\
+'int main() {\n'\
+'  std::cout << "LibTorch version: " << TORCH_VERSION << std::endl;\n'\
+'  return 0;\n'\
+'}' > /usr/lib/test_libtorch.cpp
+
+# Compile and run the test program
+RUN g++ -I/usr/lib/libtorch/include -I/usr/lib/libtorch/include/torch/csrc/api/include \
+    /usr/lib/test_libtorch.cpp -o /usr/lib/test_libtorch \
+    -L/usr/lib/libtorch/lib -ltorch -lc10 -Wl,-rpath,/usr/lib/libtorch/lib && \
+    /usr/lib/test_libtorch
