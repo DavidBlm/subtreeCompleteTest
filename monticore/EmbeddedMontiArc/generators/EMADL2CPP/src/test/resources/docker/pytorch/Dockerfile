@@ -35,5 +35,5 @@ RUN echo '#include <torch/torch.h>\n'\
 # Compile and run the test program
 RUN g++ -I/usr/lib/libtorch/include -I/usr/lib/libtorch/include/torch/csrc/api/include \
     /usr/lib/test_libtorch.cpp -o /usr/lib/test_libtorch \
-    -L/usr/lib/libtorch/lib -ltorch -lc10 -Wl,-rpath,/usr/lib/libtorch/lib && \
+    -L/usr/lib/libtorch/lib -ltorch_cpu -ltorch -lc10 -Wl,-rpath,/usr/lib/libtorch/lib && \
     /usr/lib/test_libtorch
