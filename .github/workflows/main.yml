@@ -681,10 +681,11 @@ jobs:
             cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
             cd src/test/resources/docker/pytorch
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            docker build -t ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest -f Dockerfile .
-            docker push ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest
-            docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/pytorch
+            LOWERCASE_OWNER =$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]")
+            docker build -t ghcr.io/$LOWERCASE_OWNER/emadl2cpp/dockerimages/pytorch:latest -f Dockerfile .
+            docker push ghcr.io/$LOWERCASE_OWNER/emadl2cpp/dockerimages/pytorch:latest
 
+            
   artifact-extraction:
     needs: docker_phase
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
