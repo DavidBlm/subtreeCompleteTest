@@ -130,91 +130,7 @@ jobs:
             echo "Failed stage linux"
             exit 1
           if: ${{contains(needs.*.result, 'failure')}}
-  deploy_phase:
-    needs: [linux_phase, githubjob, git_masterJobLinux]
-    if: ${{ !cancelled()}}
-    runs-on: ubuntu-latest
-    steps:
-        - run: |
-            echo "Finished stage deploy"
-          if: ${{!contains(needs.*.result, 'failure')}}
-        - run: |
-            echo "Failed stage deploy"
-            exit 1
-          if: ${{contains(needs.*.result, 'failure')}}
-
-  githubjob:
-    needs: linux_phase
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure')  &&  github.ref == 'refs/heads/master'}}
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout latest commit
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Restore large files
-        run: |
-          ls
-          find . -type f -name '*.part*' | sort | while read part; do
-          echo "Restoring $part"
-          base=$(echo "$part" | sed 's/.part.*//')
-          cat "$part" >> "$base"
-          rm "$part"
-          done
-      - name: Start Docker Container
-        run: |
-          docker pull maven:3-jdk-8
-          docker run --name build-container -d -v $(pwd):/workspace --network=host  -e CI_API_V4_URL=$CI_API_V4_URL -e GITLABTOKEN=${{ secrets.GITLABTOKEN }} maven:3-jdk-8 tail -f /dev/null
-      - name: Script
-        env:
-          SCRIPT: |
-            cd /workspace
-            cd generators/EMADL2CPP
-            which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-            eval $(ssh-agent -s)
-            ssh-add <(echo "$GITHUB_SSH_PRIV_KEY")
-            echo "$GITHUB_SSH_PRIV_KEY" | tr -d '\r' | ssh-add -
-            git config --global user.email "kusmenko@se-rwth.de"
-            git config --global user.name "EMA CI Robot"
-            mkdir -p ~/.ssh
-            echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-            git clone git@github.com:MontiCore/EmbeddedMontiArc.git
-            cd EmbeddedMontiArc
-            git subtree pull --prefix $PRJ_NAME https://git.rwth-aachen.de/monticore/EmbeddedMontiArc/${PRJ_NAME}.git master --squash
-            git push --force
-        run: docker exec build-container bash -c "$SCRIPT"
-
-  git_masterJobLinux:
-    needs: linux_phase
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure')  &&  github.ref == 'refs/heads/master'}}
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout latest commit
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Restore large files
-        run: |
-          ls
-          find . -type f -name '*.part*' | sort | while read part; do
-          echo "Restoring $part"
-          base=$(echo "$part" | sed 's/.part.*//')
-          cat "$part" >> "$base"
-          rm "$part"
-          done
-      - name: Start Docker Container
-        run: |
-          docker pull maven:3-jdk-8
-          docker run --name build-container -d -v $(pwd):/workspace --network=host  -e CI_API_V4_URL=$CI_API_V4_URL -e GITLABTOKEN=${{ secrets.GITLABTOKEN }} maven:3-jdk-8 tail -f /dev/null
-      - name: Script
-        env:
-          SCRIPT: |
-            cd /workspace
-            cd generators/EMADL2CPP
-        run: docker exec build-container bash -c "$SCRIPT"
-
+          
   integrationMXNetJobLinux:
     needs: docker_phase
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
@@ -504,7 +420,6 @@ jobs:
 
   buildDockerMXNet150:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerMXNet150 == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -528,7 +443,6 @@ jobs:
 
   buildDockerMXNet170:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerMXNet170 == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -552,7 +466,6 @@ jobs:
 
   buildDockerMXNet170onnx:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerMXNet170onnx == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -576,7 +489,6 @@ jobs:
 
   buildDockerTensorflowONNX:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerTensorflowONNX == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -604,7 +516,6 @@ jobs:
 
   buildDockerMXNet170DGL:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerMXNet170DGL == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -632,7 +543,6 @@ jobs:
 
   buildDockerDGLQD:
     needs: FileChanges
-    if: ${{needs.FileChanges.outputs.runbuildDockerDGLQD == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
