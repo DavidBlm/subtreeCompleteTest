@@ -14,8 +14,10 @@ ADD armadillo-9.600.6.zip /root/armadillo.zip
 RUN unzip /root/armadillo.zip -d /root/armadillo
 RUN cd /root/armadillo/armadillo-9.600.6 && cmake . && make && make install
 
+RUN pip3 install --upgrade pip setuptools wheel
 RUN pip3 install torch==1.12.0+cpu torchvision==0.13.0+cpu torchaudio==0.12.0 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip3 install opencv-python h5py numpy<2.0 matplotlib scipy Pillow
+RUN pip3 install numpy<2.0
+RUN pip3 install opencv-python h5py matplotlib scipy Pillow
 RUN pip3 install dgl==0.6.1
 
 RUN pip3 install --user --upgrade "cmake>=3.13.2"
