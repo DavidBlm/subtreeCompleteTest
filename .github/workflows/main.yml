@@ -678,8 +678,9 @@ jobs:
         run: |
           cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
           cd src/test/resources/docker/pytorch
-          docker build -t registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/pytorch -f Dockerfile .
-
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker build -t ghcr.io/${{ github.repository_owner }}/mnistcalculator/mxnet/run:latest -f Dockerfile .
+          docker push ghcr.io/${{ github.repository_owner }}/mnistcalculator/mxnet/run:latest
   artifact-extraction:
     needs: docker_phase
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
