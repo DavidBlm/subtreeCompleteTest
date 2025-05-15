@@ -681,7 +681,7 @@ jobs:
             cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
             cd src/test/resources/docker/pytorch
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            LOWERCASE_OWNER =$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]")
+            LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]")
             docker build -t ghcr.io/$LOWERCASE_OWNER/emadl2cpp/dockerimages/pytorch:latest -f Dockerfile .
             docker push ghcr.io/$LOWERCASE_OWNER/emadl2cpp/dockerimages/pytorch:latest
 
