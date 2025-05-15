@@ -21,7 +21,7 @@ RUN pip3 install dgl==0.6.1
 RUN pip3 install --user --upgrade "cmake>=3.13.2"
 
 ENV DGLBACKEND=pytorch
-RUN wget https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.12.0%2Bcpu.zip -O /usr/lib/libtorch.zip && \
+RUN wget https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.12.1%2Bcpu.zip -O /usr/lib/libtorch.zip && \
     unzip /usr/lib/libtorch.zip -d /usr/lib && \
     rm /usr/lib/libtorch.zip
 # Add a test program to verify libtorch install
