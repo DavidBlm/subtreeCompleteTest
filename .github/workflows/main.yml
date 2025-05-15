@@ -1,8 +1,8 @@
-name: EMADL2CPPTEST
+name: EMADL2CPP
 on:
   push:
     paths:
-      - 'monticore/EmbeddedMontiArc/generators/EMADL2CPP/**'
+      - 'generators/EMADL2CPP/**'
   workflow_dispatch:
 env:
   CI_PROJECT_ID : 17712
@@ -107,7 +107,7 @@ jobs:
           fi
           echo "run=$run" >> $GITHUB_OUTPUT
   docker_phase:
-    needs: [buildDockerMXNet150, buildDockerTensorflowONNX, buildDockerPyTorch, buildDockerMXNet170onnx, buildDockerMXNet170DGL, buildDockerDGLQD, buildDockerMXNet170]
+    needs: [buildDockerDGLQD, buildDockerTensorflowONNX, buildDockerMXNet150, buildDockerPyTorch, buildDockerMXNet170DGL, buildDockerMXNet170, buildDockerMXNet170onnx]
     if: ${{ !cancelled()}}
     runs-on: ubuntu-latest
     steps:
@@ -119,7 +119,7 @@ jobs:
             exit 1
           if: ${{contains(needs.*.result, 'failure')}}
   linux_phase:
-    needs: [docker_phase, artifact-extraction, integrationCaffe2JobLinux, modularityTest, integrationPythonWrapperTest, integrationGluonJobLinux, integrationPyTorchJobLinux, integrationMXNetJobLinux, integrationTensorflowJobLinux, UnitTestJobLinux]
+    needs: [docker_phase, integrationGluonJobLinux, integrationTensorflowJobLinux, integrationPyTorchJobLinux, integrationPythonWrapperTest, modularityTest, integrationMXNetJobLinux, UnitTestJobLinux, artifact-extraction, integrationCaffe2JobLinux]
     if: ${{ !cancelled()}}
     runs-on: ubuntu-latest
     steps:
@@ -170,7 +170,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
             eval $(ssh-agent -s)
             ssh-add <(echo "$GITHUB_SSH_PRIV_KEY")
@@ -212,8 +212,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-            
+            cd generators/EMADL2CPP
         run: docker exec build-container bash -c "$SCRIPT"
 
   integrationMXNetJobLinux:
@@ -245,7 +244,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B  -U clean install --settings settings.xml -Dtest=IntegrationMXNetTest -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
 
@@ -277,7 +276,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B  -U clean install --settings settings.xml -Dtest=IntegrationCaffe2Test -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
 
@@ -309,7 +308,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             ln /usr/bin/python3 /usr/bin/python -f
             python -m pip install -U pip
             python -m pip install scikit-image
@@ -323,7 +322,7 @@ jobs:
           name: integrationGluonJobLinux
           retention-days: 7
           path: |
-            monticore/EmbeddedMontiArc/generators/EMADL2CPP/target
+            generators/EMADL2CPP/target
 
   integrationTensorflowJobLinux:
     needs: docker_phase
@@ -352,7 +351,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B -U clean install --settings settings.xml -Dtest=IntegrationTensorflowTest -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
 
@@ -383,7 +382,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B -U clean install --settings settings.xml -Dtest="MontiAnnaGeneratorTest#testPyTorchBackendArtefactsGenerationWithEMADLGenerator,ConfigurationTest,PersistentLoggingDataTest,TrackingTest" -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
 
@@ -414,7 +413,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B -U  clean install --settings settings.xml -Dtest=IntegrationPythonWrapperTest -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
       - name: Upload artifacts
@@ -424,7 +423,7 @@ jobs:
           name: integrationPythonWrapperTest
           retention-days: 7
           path: |
-            monticore/EmbeddedMontiArc/generators/EMADL2CPP/target
+            generators/EMADL2CPP/target
 
   modularityTest:
     needs: docker_phase
@@ -453,7 +452,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             export TZ=Europe/Berlin && apt update && DEBIAN_FRONTEND=noninteractive apt install -y tzdata
             apt update && apt install libopencv-dev python3-opencv libopenblas-dev liblapack-dev -y
             ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime
@@ -491,7 +490,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B -U clean install --settings settings.xml -Dtest="GenerationTest,SymtabTest*" -Dmaven.wagon.http.retryHandler.count=50 -Dmaven.wagon.http.connectionTimeout=6000000 -Dmaven.wagon.http.readTimeout=600000000
         run: docker exec build-container bash -c "$SCRIPT"
       - name: Upload artifacts
@@ -501,7 +500,7 @@ jobs:
           name: UnitTestJobLinux
           retention-days: 7
           path: |
-            monticore/EmbeddedMontiArc/generators/EMADL2CPP/target
+            generators/EMADL2CPP/target
 
   buildDockerMXNet150:
     needs: FileChanges
@@ -524,8 +523,8 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/mxnet150
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/mxnet150
 
   buildDockerMXNet170:
     needs: FileChanges
@@ -548,8 +547,8 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/mxnet170
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/mxnet170
 
   buildDockerMXNet170onnx:
     needs: FileChanges
@@ -572,8 +571,8 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/mxnet170
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/mxnet170
 
   buildDockerTensorflowONNX:
     needs: FileChanges
@@ -596,11 +595,12 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/tensorflow
-          docker login registry.git.rwth-aachen.de -u someUserName -p glpat--9siQV_pCkA2wFRqeDhf
-          docker build -t registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/tensorflow-onnx -f Dockerfile-onnx .
-          docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/tensorflow-onnx
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/tensorflow
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker build -t ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest -f Dockerfile-onnx .
+            docker push ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest
+            docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/tensorflow-onnx
 
   buildDockerMXNet170DGL:
     needs: FileChanges
@@ -623,11 +623,12 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/mxnet170
-          docker login registry.git.rwth-aachen.de -u someUserName -p glpat--9siQV_pCkA2wFRqeDhf
-          docker build -t registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/mxnet170-dgl:v0.0.1 -f Dockerfile-dgl .
-          docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/mxnet170-dgl:v0.0.1
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/mxnet170
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker build -t ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest -f Dockerfile-dgl .
+            docker push ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest
+            docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/mxnet170-dgl:v0.0.1
 
   buildDockerDGLQD:
     needs: FileChanges
@@ -650,14 +651,16 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/dglqd
-          docker login registry.git.rwth-aachen.de -u someUserName -p ${{ secrets.GITLABTOKEN }}
-          docker build -t registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/dgl-qd -f Dockerfile .
-          docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/dgl-qd
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/dglqd
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker build -t ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest -f Dockerfile .
+            docker push ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest
+            docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/dgl-qd
 
   buildDockerPyTorch:
     needs: FileChanges
+    if: ${{needs.FileChanges.outputs.runbuildDockerPyTorch == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -676,11 +679,13 @@ jobs:
           done
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          cd src/test/resources/docker/pytorch
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-          docker build -t ghcr.io/${{ github.repository_owner }}/mnistcalculator/mxnet/run:latest -f Dockerfile .
-          docker push ghcr.io/${{ github.repository_owner }}/mnistcalculator/mxnet/run:latest
+            cd generators/EMADL2CPP
+            cd src/test/resources/docker/pytorch
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker build -t ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest -f Dockerfile .
+            docker push ghcr.io/$LOWERCASE_OWNER/mnistcalculator/mxnet/run:latest
+            docker push registry.git.rwth-aachen.de/monticore/embeddedmontiarc/generators/emadl2cpp/dockerimages/pytorch
+
   artifact-extraction:
     needs: docker_phase
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
@@ -708,7 +713,7 @@ jobs:
         env:
           SCRIPT: |
             cd /workspace
-            cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
+            cd generators/EMADL2CPP
             apt-get update -qq && apt-get install -y -qq openjdk-11-jre-headless python3 python3-pip git
             cd extractor
             pip3 install -r requirements.txt
@@ -721,7 +726,7 @@ jobs:
           name: artifact-extraction
           retention-days: 7
           path: |
-            monticore/EmbeddedMontiArc/generators/EMADL2CPP/extractor/output
+            generators/EMADL2CPP/extractor/output
 
   pages:
     needs: artifact-extraction
@@ -750,16 +755,17 @@ jobs:
         with:
           name: artifact-extraction
           path: |
-            monticore/EmbeddedMontiArc/generators/EMADL2CPP/extractor/output
+            generators/EMADL2CPP/extractor/output
       - name: Script
         run: |
-          cd monticore/EmbeddedMontiArc/generators/EMADL2CPP
-          mkdir .public
-          cp -r extractor/output/html/* .public
-          mv .public public
+            cd generators/EMADL2CPP
+            mkdir .public
+            cp -r extractor/output/html/* .public
+            mv .public public
       - name: Upload Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: monticore/EmbeddedMontiArc/generators/EMADL2CPP/public/
+          path: generators/EMADL2CPP/public/
       - name: Deploy to Pages
         uses: actions/deploy-pages@v4
+
