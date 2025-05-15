@@ -48,3 +48,17 @@ RUN mkdir /usr/lib/build && cd /usr/lib/build && \
     cmake --build . && \
     ./test_libtorch
 
+# Add test script
+RUN echo 'import torch\n'\
+'def test_libtorch():\n'\
+'    print("PyTorch version:", torch.__version__)\n'\
+'    x = torch.rand(5, 3)\n'\
+'    print("Random tensor:\\n", x)\n'\
+'    y = torch.mm(x, torch.rand(3, 2))\n'\
+'    print("Matrix multiplication result:\\n", y)\n'\
+'    print("CUDA available:", torch.cuda.is_available())\n'\
+'if __name__ == "__main__":\n'\
+'    test_libtorch()' > /usr/lib/test_libtorch.py
+
+# Run the test
+RUN python3 /usr/lib/test_libtorch.py
